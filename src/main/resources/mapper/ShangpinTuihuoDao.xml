@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ShangpinTuihuoDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.shangpin_tuihuo_uuid_number as shangpinTuihuoUuidNumber
+        ,a.shangpin_order_id as shangpinOrderId
+        ,a.yonghu_id as yonghuId
+        ,a.shangpin_tuihuo_content as shangpinTuihuoContent
+        ,a.insert_time as insertTime
+        ,a.shangpin_tuihuo_courier_name as shangpinTuihuoCourierName
+        ,a.shangpin_tuihuo_courier_number as shangpinTuihuoCourierNumber
+        ,a.shangpin_tuihuo_types as shangpinTuihuoTypes
+        ,a.shangpin_tuihuo_yesno_types as shangpinTuihuoYesnoTypes
+        ,a.shangpin_tuihuo_yesno_text as shangpinTuihuoYesnoText
+        ,a.shangpin_tuihuo_shenhe_time as shangpinTuihuoShenheTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ShangpinTuihuoView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,shangpinOrder.shangpin_order_uuid_number as shangpinOrderUuidNumber
+        ,shangpinOrder.yonghu_id as shangpinOrderYonghuId
+        ,shangpinOrder.buy_number as buyNumber
+        ,shangpinOrder.shangpin_order_true_price as shangpinOrderTruePrice
+        ,shangpinOrder.shangpin_order_courier_name as shangpinOrderCourierName
+        ,shangpinOrder.shangpin_order_courier_number as shangpinOrderCourierNumber
+        ,shangpinOrder.shangpin_order_types as shangpinOrderTypes
+        ,shangpinOrder.shangpin_order_payment_types as shangpinOrderPaymentTypes
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.new_money as newMoney
+        ,yonghu.yonghu_sum_jifen as yonghuSumJifen
+        ,yonghu.yonghu_new_jifen as yonghuNewJifen
+        ,yonghu.huiyuandengji_types as huiyuandengjiTypes
+
+        FROM shangpin_tuihuo  a
+        left JOIN shangpin_order shangpinOrder ON a.shangpin_order_id = shangpinOrder.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.shangpinTuihuoUuidNumber != '' and params.shangpinTuihuoUuidNumber != null and params.shangpinTuihuoUuidNumber != 'null' ">
+                and a.shangpin_tuihuo_uuid_number like CONCAT('%',#{params.shangpinTuihuoUuidNumber},'%')
+            </if>
+            <if test="params.shangpinOrderId != null and params.shangpinOrderId != ''">
+                and (
+                    a.shangpin_order_id = #{params.shangpinOrderId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                    or shangpinOrder.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.shangpinTuihuoContent != '' and params.shangpinTuihuoContent != null and params.shangpinTuihuoContent != 'null' ">
+                and a.shangpin_tuihuo_content like CONCAT('%',#{params.shangpinTuihuoContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test=" params.shangpinTuihuoCourierName != '' and params.shangpinTuihuoCourierName != null and params.shangpinTuihuoCourierName != 'null' ">
+                and a.shangpin_tuihuo_courier_name like CONCAT('%',#{params.shangpinTuihuoCourierName},'%')
+            </if>
+            <if test=" params.shangpinTuihuoCourierNumber != '' and params.shangpinTuihuoCourierNumber != null and params.shangpinTuihuoCourierNumber != 'null' ">
+                and a.shangpin_tuihuo_courier_number like CONCAT('%',#{params.shangpinTuihuoCourierNumber},'%')
+            </if>
+            <if test="params.shangpinTuihuoTypes != null and params.shangpinTuihuoTypes != ''">
+                and a.shangpin_tuihuo_types = #{params.shangpinTuihuoTypes}
+            </if>
+            <if test="params.shangpinTuihuoYesnoTypes != null and params.shangpinTuihuoYesnoTypes != ''">
+                and a.shangpin_tuihuo_yesno_types = #{params.shangpinTuihuoYesnoTypes}
+            </if>
+            <if test=" params.shangpinTuihuoYesnoText != '' and params.shangpinTuihuoYesnoText != null and params.shangpinTuihuoYesnoText != 'null' ">
+                and a.shangpin_tuihuo_yesno_text like CONCAT('%',#{params.shangpinTuihuoYesnoText},'%')
+            </if>
+            <if test=" params.shangpinTuihuoShenheTimeStart != '' and params.shangpinTuihuoShenheTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.shangpin_tuihuo_shenhe_time) >= UNIX_TIMESTAMP(#{params.shangpinTuihuoShenheTimeStart}) ]]>
+            </if>
+            <if test=" params.shangpinTuihuoShenheTimeEnd != '' and params.shangpinTuihuoShenheTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.shangpin_tuihuo_shenhe_time) <= UNIX_TIMESTAMP(#{params.shangpinTuihuoShenheTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断商品订单的id不为空 -->
+            <if test=" params.shangpinOrderIdNotNull != '' and params.shangpinOrderIdNotNull != null and params.shangpinOrderIdNotNull != 'null' ">
+                and a.shangpin_order_id IS NOT NULL
+            </if>
+            <if test=" params.shangpinOrderUuidNumber != '' and params.shangpinOrderUuidNumber != null and params.shangpinOrderUuidNumber != 'null' ">
+                and shangpinOrder.shangpin_order_uuid_number like CONCAT('%',#{params.shangpinOrderUuidNumber},'%')
+            </if>
+            <if test="params.addressId != null  and params.addressId != ''">
+                and shangpinOrder.address_id = #{params.addressId}
+            </if>
+            <if test="params.shangpinId != null  and params.shangpinId != ''">
+                and shangpinOrder.shangpin_id = #{params.shangpinId}
+            </if>
+            <if test="params.buyNumberStart != null  and params.buyNumberStart != '' ">
+                <![CDATA[  and shangpinOrder.buy_number >= #{params.buyNumberStart}   ]]>
+            </if>
+            <if test="params.buyNumberEnd != null  and params.buyNumberEnd != '' ">
+                <![CDATA[  and shangpinOrder.buy_number <= #{params.buyNumberEnd}   ]]>
+            </if>
+            <if test="params.buyNumber != null  and params.buyNumber != '' ">
+                and shangpinOrder.buy_number = #{params.buyNumber}
+            </if>
+            <if test="params.shangpinOrderTruePriceStart != null ">
+                <![CDATA[  and shangpinOrder.shangpin_order_true_price >= #{params.shangpinOrderTruePriceStart}   ]]>
+            </if>
+            <if test="params.shangpinOrderTruePriceEnd != null ">
+                <![CDATA[  and shangpinOrder.shangpin_order_true_price <= #{params.shangpinOrderTruePriceEnd}   ]]>
+            </if>
+            <if test=" params.shangpinOrderCourierName != '' and params.shangpinOrderCourierName != null and params.shangpinOrderCourierName != 'null' ">
+                and shangpinOrder.shangpin_order_courier_name like CONCAT('%',#{params.shangpinOrderCourierName},'%')
+            </if>
+            <if test=" params.shangpinOrderCourierNumber != '' and params.shangpinOrderCourierNumber != null and params.shangpinOrderCourierNumber != 'null' ">
+                and shangpinOrder.shangpin_order_courier_number like CONCAT('%',#{params.shangpinOrderCourierNumber},'%')
+            </if>
+            <if test="params.shangpinOrderTypes != null  and params.shangpinOrderTypes != ''">
+                and shangpinOrder.shangpin_order_types = #{params.shangpinOrderTypes}
+            </if>
+
+            <if test="params.shangpinOrderPaymentTypes != null  and params.shangpinOrderPaymentTypes != ''">
+                and shangpinOrder.shangpin_order_payment_types = #{params.shangpinOrderPaymentTypes}
+            </if>
+
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpinOrder.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpinOrder.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+            <if test="params.yonghuSumJifenStart != null ">
+                <![CDATA[  and yonghu.yonghu_sum_jifen >= #{params.yonghuSumJifenStart}   ]]>
+            </if>
+            <if test="params.yonghuSumJifenEnd != null ">
+                <![CDATA[  and yonghu.yonghu_sum_jifen <= #{params.yonghuSumJifenEnd}   ]]>
+            </if>
+            <if test="params.yonghuNewJifenStart != null ">
+                <![CDATA[  and yonghu.yonghu_new_jifen >= #{params.yonghuNewJifenStart}   ]]>
+            </if>
+            <if test="params.yonghuNewJifenEnd != null ">
+                <![CDATA[  and yonghu.yonghu_new_jifen <= #{params.yonghuNewJifenEnd}   ]]>
+            </if>
+            <if test="params.huiyuandengjiTypes != null  and params.huiyuandengjiTypes != ''">
+                and yonghu.huiyuandengji_types = #{params.huiyuandengjiTypes}
+            </if>
+
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
